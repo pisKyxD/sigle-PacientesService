@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
     List<Notificacion> findByPacienteId(Long pacienteId);
+    List<Notificacion> findByPacienteIdAndLeidoFalse(Long pacienteId);
 }

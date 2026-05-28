@@ -30,4 +30,15 @@ public class NotificacionController {
     public ResponseEntity<List<Notificacion>> getByPacienteId(@PathVariable Long pacienteId) {
         return ResponseEntity.ok(service.getByPacienteId(pacienteId));
     }
+
+    @GetMapping("/paciente/{pacienteId}/no-leidas")
+    public ResponseEntity<List<Notificacion>> getNoLeidas(@PathVariable Long pacienteId) {
+        return ResponseEntity.ok(service.getNoLeidasByPacienteId(pacienteId));
+    }
+
+    @PutMapping("/paciente/{pacienteId}/marcar-leidas")
+    public ResponseEntity<Void> marcarLeidas(@PathVariable Long pacienteId) {
+        service.marcarTodasComoLeidas(pacienteId);
+        return ResponseEntity.ok().build();
+    }
 }

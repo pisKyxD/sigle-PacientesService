@@ -36,11 +36,16 @@ public class Notificacion {
     
     @Column(name = "creado_en")
     private LocalDateTime creadoEn;
+
+    @Column(name = "leido")
+    @Builder.Default
+    private Boolean leido = false;
     
     @PrePersist
     protected void onCreate() {
         creadoEn = LocalDateTime.now();
         if (intentos == null) intentos = 0;
         if (estado == null) estado = "PENDIENTE";
+        if (leido == null) leido = false;
     }
 }
