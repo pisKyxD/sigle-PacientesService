@@ -25,4 +25,14 @@ public class NotificacionService {
     public List<Notificacion> getByPacienteId(Long pacienteId) {
         return repository.findByPacienteId(pacienteId);
     }
+
+    public List<Notificacion> getNoLeidasByPacienteId(Long pacienteId) {
+        return repository.findByPacienteIdAndLeidoFalse(pacienteId);
+    }
+
+    public void marcarTodasComoLeidas(Long pacienteId) {
+        List<Notificacion> notificaciones = repository.findByPacienteIdAndLeidoFalse(pacienteId);
+        notificaciones.forEach(n -> n.setLeido(true));
+        repository.saveAll(notificaciones);
+    }
 }
