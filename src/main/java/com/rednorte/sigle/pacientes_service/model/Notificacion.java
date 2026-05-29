@@ -21,26 +21,26 @@ public class Notificacion {
 
     @Column(name = "paciente_id")
     private Long pacienteId;
-    
+
     private String tipo;
     private String canal;
     private String mensaje;
     private String estado;
     private Integer intentos;
-    
+
     @Column(name = "enviado_en")
     private LocalDateTime enviadoEn;
-    
+
     @Column(name = "evento_origen")
     private String eventoOrigen;
-    
+
     @Column(name = "creado_en")
     private LocalDateTime creadoEn;
 
     @Column(name = "leido")
     @Builder.Default
     private Boolean leido = false;
-    
+
     @PrePersist
     protected void onCreate() {
         creadoEn = LocalDateTime.now();
