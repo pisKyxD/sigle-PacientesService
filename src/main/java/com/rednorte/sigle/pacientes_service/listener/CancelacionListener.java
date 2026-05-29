@@ -20,10 +20,11 @@ public class CancelacionListener {
 
     @RabbitListener(queues = "sigle.citas.canceladas")
     public void recibirCancelacion(CancelacionEvento evento) {
-        log.info("Evento de cancelación recibido para la cita {} del paciente {}", evento.getCitaId(), evento.getPacienteId());
+        log.info("Evento de cancelación recibido para la cita {} del paciente {}",
+                evento.getCitaId(), evento.getPacienteId());
 
         String mensaje = String.format(
-            "Estimado paciente, lamentamos informar que su cita ha sido cancelada por el siguiente motivo: %s. Pronto será reasignado.", 
+            "Estimado paciente, lamentamos informar que su cita ha sido cancelada por el siguiente motivo: %s. Pronto será reasignado.",
             evento.getMotivo()
         );
 
@@ -49,3 +50,4 @@ public class CancelacionListener {
         private String motivo;
     }
 }
+
