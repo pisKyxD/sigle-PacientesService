@@ -20,6 +20,7 @@ const Notificacion = sequelize.define('Notificacion', {
     enviadoEn: { type: DataTypes.DATE, allowNull: true, field: 'enviado_en' },
     eventoOrigen: { type: DataTypes.STRING, allowNull: true, field: 'evento_origen' },
     creadoEn: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'creado_en' },
+    leido: { type: DataTypes.BOOLEAN, defaultValue: false, field: 'leido' },
 }, {
     tableName: 'notificaciones',
     timestamps: false,

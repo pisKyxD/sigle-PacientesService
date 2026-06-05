@@ -18,4 +18,17 @@ const getByPacienteId = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { getAll, getById, getByPacienteId };
+const getNoLeidas = async (req, res, next) => {
+    try {
+        res.json(await service.getNoLeidasByPacienteId(req.params.pacienteId));
+    } catch (err) { next(err); }
+};
+
+const marcarLeidas = async (req, res, next) => {
+    try {
+        await service.marcarTodasComoLeidas(req.params.pacienteId);
+        res.status(200).json({ message: 'Notificaciones marcadas como leídas' });
+    } catch (err) { next(err); }
+};
+
+module.exports = { getAll, getById, getByPacienteId, getNoLeidas, marcarLeidas };
