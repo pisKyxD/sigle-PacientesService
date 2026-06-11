@@ -2,9 +2,10 @@
   "name": "sigle-pacientesservice",
   "version": "1.0.0",
   "description": "Microservicio del sistema SIGLE que escucha eventos de cancelación de citas desde RabbitMQ y genera notificaciones para los pacientes.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js",
+    "test": "jest --forceExit --coverage"
   },
   "repository": {
     "type": "git",
@@ -24,5 +25,9 @@
     "express": "^5.2.1",
     "mysql2": "^3.22.4",
     "sequelize": "^6.37.8"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }
