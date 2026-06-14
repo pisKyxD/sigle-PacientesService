@@ -1,20 +1,20 @@
 # Sigle-PacientesService
 
-Microservicio del sistema SIGLE que escucha eventos de cancelación de citas desde RabbitMQ y genera notificaciones para los pacientes.
+Microservicio del sistema SIGLE (migrado de Spring Boot a Node.js) que escucha eventos de cancelación de citas desde RabbitMQ y genera notificaciones para los pacientes.
 
 ## Stack
 
-- Java 17
-- Spring Boot 3.2.5
-- Spring Data JPA
-- Spring AMQP (RabbitMQ)
-- MySQL
-- Lombok
+- Node.js 20
+- Express 5
+- Sequelize + MySQL2
+- amqplib (RabbitMQ)
+- Jest + Supertest (testing)
+- pnpm (gestor de paquetes)
 
 ## Requisitos
 
-- Java 17+
-- Maven 3.9+
+- Node.js 20+
+- pnpm (`npm install -g pnpm`)
 - MySQL corriendo
 - RabbitMQ corriendo en `localhost:5672`
 - CitasService activo para que lleguen los eventos
@@ -25,33 +25,51 @@ Microservicio del sistema SIGLE que escucha eventos de cancelación de citas des
 docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management
 ```
 
-## Configuración
+Consola en `http://localhost:15672` (guest / guest)
 
-```properties
-server.port=8083
-spring.datasource.url=jdbc:mysql://localhost:3306/sigle_pacientes?createDatabaseIfNotExist=true&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=tu_password
-spring.rabbitmq.host=localhost
-spring.rabbitmq.port=5672
-spring.rabbitmq.username=guest
-spring.rabbitmq.password=guest
+## Variables de entorno
+
+Copiar `.env.example` a `.env`:
+
+```env
+PORT=10000
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=sigle_pacientes
+DB_USER=root
+DB_PASSWORD=tu_password
+RABBITMQ_URL=amqp://guest:guest@localhost:5672
 ```
 
 ## Instalación
 
 ```bash
-mvn clean package -DskipTests
-java -jar target/pacientes-service-0.0.1-SNAPSHOT.jar
+pnpm install
+pnpm start
 ```
 
-Disponible en `http://localhost:8083`
+Disponible en `http://localhost:10000`
+
+## Tests
+
+```bash
+pnpm test
+```
+
+Corre con Jest + Supertest, usando mocks del modelo Sequelize (no requiere BD real).
+
+### Tests con Docker
+
+```bash
+docker build -f Dockerfile.test -t pacientes-tests .
+docker run --rm pacientes-tests
+```
 
 ## Docker
 
 ```bash
 docker build -t sigle-pacientes-service .
-docker run -p 8083:10000 sigle-pacientes-service
+docker run -p 10000:10000 sigle-pacientes-service
 ```
 
 ## Endpoints
@@ -59,14 +77,19 @@ docker run -p 8083:10000 sigle-pacientes-service
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/pacientes/notificaciones` | Todas las notificaciones |
-| GET | `/api/pacientes/notificaciones/{pacienteId}` | Notificaciones de un paciente |
+| GET | `/api/pacientes/notificaciones/{id}` | Por ID |
+| GET | `/api/pacientes/notificaciones/paciente/{pacienteId}` | Notificaciones de un paciente |
+| GET | `/api/pacientes/notificaciones/paciente/{pacienteId}/no-leidas` | Notificaciones no leídas |
+| PUT | `/api/pacientes/notificaciones/paciente/{pacienteId}/marcar-leidas` | Marca todas como leídas |
+
+Todas las rutas con `{pacienteId}` o `{id}` validan que sea un número válido; si no, retornan `400`.
 
 ## Cómo funciona
 
-Este servicio solo consume mensajes, no publica. Cuando CitasService cancela una cita, publica un evento en la queue `sigle.citas.canceladas`. El `CancelacionListener` de este servicio lo recibe y guarda la notificación en la BD.
+Este servicio consume eventos y expone notificaciones. Cuando CitasService cancela una cita, publica un evento en la queue `sigle.citas.canceladas`. El `cancelacionListener` de este servicio lo recibe y guarda la notificación en la BD vía Sequelize.
 
 ```
-CitasService → sigle.exchange → sigle.citas.canceladas → CancelacionListener → BD
+CitasService → sigle.exchange → sigle.citas.canceladas → cancelacionListener → MySQL
 ```
 
 El mensaje que se guarda como notificación es:
@@ -85,23 +108,27 @@ El mensaje que se guarda como notificación es:
 ## Health
 
 ```
-GET http://localhost:8083/actuator/health
+GET http://localhost:10000/health
 ```
 
 ## Estructura
 
 ```
-src/main/java/com/rednorte/sigle/pacientes_service/
+src/
+├── app.js                  # configuración de Express (testeable)
+├── index.js                # entry point, conecta BD y arranca servidor
 ├── config/
-│   └── RabbitMQConfig.java
-├── controller/
-│   └── NotificacionController.java
-├── listener/
-│   └── CancelacionListener.java
-├── model/
-│   └── Notificacion.java
-├── repository/
-│   └── NotificacionRepository.java
-└── service/
-    └── NotificacionService.java
+│   └── database.js         # conexión Sequelize (SSL para Aiven)
+├── controllers/
+│   └── notificacionController.js
+├── listeners/
+│   └── cancelacionListener.js
+├── models/
+│   └── Notificacion.js
+├── routes/
+│   └── notificaciones.js
+└── services/
+    └── notificacionService.js
+tests/
+└── notificaciones.test.js
 ```
