@@ -14,6 +14,9 @@ const enviarCorreo = async ({ destinatario, asunto, mensaje }) => {
   }
 
   try {
+    await transporter.verify();
+    console.log('[Email] SMTP verificado correctamente.');
+
     await transporter.sendMail({
       from: `"${FROM_NAME}" <${process.env.GMAIL_USER}>`,
       to: destinatario,
@@ -21,10 +24,17 @@ const enviarCorreo = async ({ destinatario, asunto, mensaje }) => {
       text: mensaje,
       html: `<p>${mensaje.replace(/\n/g, '<br/>')}</p>`,
     });
+
     console.log(`[Email] Correo enviado a ${destinatario}`);
     return true;
+
   } catch (err) {
-    console.error('[Email] Error al enviar correo:', err.message);
+    console.error('========== ERROR SMTP ==========');
+    console.error(err);
+    console.error('Código:', err.code);
+    console.error('Comando:', err.command);
+    console.error('Respuesta:', err.response);
+    console.error('================================');
     return false;
   }
 };
