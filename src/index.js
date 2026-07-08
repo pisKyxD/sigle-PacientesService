@@ -1,6 +1,7 @@
 require('dotenv').config();
 const sequelize = require('./config/database');
 const { startListener } = require('./listeners/cancelacionListener');
+const { startListener: startCreacionListener } = require('./listeners/creacionListener');
 const app = require('./app');
 const eurekaClient = require('./config/eureka');
 
@@ -10,6 +11,7 @@ sequelize.sync({ alter: true })
   .then(() => {
     console.log('[DB] Conectado y sincronizado.');
     startListener();
+    startCreacionListener();
     app.listen(PORT, () => {
       console.log(`[Server] pacientes-service corriendo en puerto ${PORT}`);
       eurekaClient.start((error) => {
