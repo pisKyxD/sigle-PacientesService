@@ -20,8 +20,6 @@ async function startListener() {
             tipo: 'CANCELACION_CITA',
             canal: 'EMAIL',
             mensaje,
-            estado: 'ENVIADA',
-            enviadoEn: new Date(),
             eventoOrigen: 'CitasService.Cancelacion',
             });
             console.log('[RabbitMQ] Notificación guardada.');
