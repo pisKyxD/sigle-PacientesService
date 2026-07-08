@@ -7,9 +7,7 @@ const ASUNTOS_POR_TIPO = {
     CREACION_CITA: 'Confirmación de tu cita médica',
 };
 
-const getAll = async () => {
-    return await Notificacion.findAll();
-};
+const getAll = async () => await Notificacion.findAll();
 
 const getById = async (id) => {
     const notificacion = await Notificacion.findByPk(id);
@@ -84,39 +82,35 @@ const create = async (data) => {
 
                 console.log("[NOTIFICACION] Email destino:", paciente.email);
 
+                console.log("[NOTIFICACION] >>> Antes de llamar a emailService");
+
                 enviado = await emailService.enviarCorreo({
                     destinatario: paciente.email,
                     asunto: ASUNTOS_POR_TIPO[data.tipo] || 'Notificación SIGLE RedNorte',
                     mensaje: data.mensaje,
                 });
 
+                console.log("[NOTIFICACION] >>> Después de llamar a emailService");
+
                 console.log("[NOTIFICACION] Resultado envío:", enviado);
 
             } else {
 
-                console.warn(
-                    `[NOTIFICACION] El paciente ${data.pacienteId} no tiene correo registrado.`
-                );
+                console.warn(`[NOTIFICACION] Paciente ${data.pacienteId} sin email.`);
 
             }
 
         } catch (err) {
 
-            console.error("========================================");
-            console.error("[NOTIFICACION] ERROR EN ENVÍO");
+            console.error("[NOTIFICACION] Error enviando correo:");
             console.error(err);
-            console.error("========================================");
 
         }
 
         await notificacion.update({
-
             estado: enviado ? 'ENVIADA' : 'FALLIDA',
-
             intentos: 1,
-
-            enviadoEn: enviado ? new Date() : null
-
+            enviadoEn: enviado ? new Date() : null,
         });
 
         console.log("[NOTIFICACION] Estado actualizado:", enviado ? "ENVIADA" : "FALLIDA");
@@ -124,11 +118,8 @@ const create = async (data) => {
     } else {
 
         await notificacion.update({
-
             estado: data.estado || 'ENVIADA',
-
             enviadoEn: data.enviadoEn || new Date(),
-
         });
 
     }
@@ -142,5 +133,5 @@ module.exports = {
     getByPacienteId,
     getNoLeidasByPacienteId,
     marcarTodasComoLeidas,
-    create,
+    create
 };
