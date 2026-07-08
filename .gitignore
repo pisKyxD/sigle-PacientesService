@@ -1,5 +1,22 @@
+# Dependencias Node
 node_modules/
-.env
 
-### VS Code ###
+# Variables de entorno
+.env
+.env.*
+
+# pnpm
+.pnpm-store/
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VS Code
 .vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
