@@ -2,15 +2,23 @@ const amqp = require('amqplib');
 const service = require('../services/notificacionService');
 
 const EXCHANGE = 'sigle.exchange';
-const ROUTING_KEY = 'citas.cancelada';
-const QUEUE = 'sigle.citas.canceladas';
+const ROUTING_KEY = 'citas.creada';
+const QUEUE = 'sigle.citas.creadas';
+
+function formatearFecha(fechaHora) {
+    if (!fechaHora) return '';
+
+    const d = new Date(fechaHora);
+
+    return d.toLocaleString('es-CL', {
+        dateStyle: 'long',
+        timeStyle: 'short'
+    });
+}
 
 async function startListener() {
-
     try {
-
         const conn = await amqp.connect(process.env.RABBITMQ_URL);
-
         const channel = await conn.createChannel();
 
         await channel.assertExchange(EXCHANGE, 'direct', {
@@ -31,7 +39,7 @@ async function startListener() {
 
         channel.consume(QUEUE, async (msg) => {
 
-            console.log("========== CANCELACIÓN RECIBIDA ==========");
+            console.log("========== MENSAJE RECIBIDO ==========");
 
             if (!msg) return;
 
@@ -41,18 +49,26 @@ async function startListener() {
 
                 const evento = JSON.parse(msg.content.toString());
 
+                console.log("Evento:", evento);
+
+                const fecha = formatearFecha(evento.fechaHora);
+
+                const medico = evento.medicoNombre
+                    ? ` con el Dr(a). ${evento.medicoNombre}`
+                    : '';
+
                 const mensaje =
-                    `Estimado paciente, lamentamos informar que su cita ha sido cancelada por el siguiente motivo: ${evento.motivo}. Pronto será reasignado.`;
+                    `Estimado paciente, su cita de ${evento.especialidad || 'atención médica'}${medico} ha sido agendada exitosamente para el ${fecha}.`;
 
                 await service.create({
                     pacienteId: evento.pacienteId,
-                    tipo: 'CANCELACION_CITA',
+                    tipo: 'CREACION_CITA',
                     canal: 'EMAIL',
                     mensaje,
-                    eventoOrigen: 'CitasService.Cancelacion',
+                    eventoOrigen: 'CitasService.Creacion',
                 });
 
-                console.log("[RabbitMQ] Notificación de cancelación creada.");
+                console.log("[RabbitMQ] Notificación creada correctamente.");
 
                 channel.ack(msg);
 
@@ -61,24 +77,22 @@ async function startListener() {
                 console.error("[RabbitMQ] Error:", err);
 
                 channel.nack(msg, false, false);
-
             }
 
         });
 
         conn.on('close', () => {
-            console.warn("[RabbitMQ] Conexión cerrada.");
+            console.warn("[RabbitMQ] Conexión cerrada. Reintentando...");
             setTimeout(startListener, 5000);
         });
 
     } catch (err) {
 
-        console.error("[RabbitMQ] Error:", err);
+        console.error("[RabbitMQ] Error de conexión:", err);
 
         setTimeout(startListener, 5000);
 
     }
-
 }
 
 module.exports = {

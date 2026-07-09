@@ -1,33 +1,41 @@
 {
-  "name": "sigle-pacientesservice",
+  "name": "sigle-pacientes-service",
   "version": "1.0.0",
   "description": "Microservicio del sistema SIGLE que escucha eventos de cancelación de citas desde RabbitMQ y genera notificaciones para los pacientes.",
   "main": "src/index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "jest --forceExit --coverage"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pisKyxD/sigle-PacientesService.git"
+    "url": "https://github.com/pisKyxD/sigle-PacientesService.git"
   },
-  "keywords": [],
+  "keywords": [
+    "nodejs",
+    "microservice",
+    "rabbitmq",
+    "mysql",
+    "sequelize"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/pisKyxD/sigle-PacientesService/issues"
-  },
-  "homepage": "https://github.com/pisKyxD/sigle-PacientesService#readme",
   "dependencies": {
-    "amqplib": "^2.0.1",
+    "amqplib": "^0.10.5",
+    "axios": "^1.7.9",
     "dotenv": "^17.4.2",
+    "eureka-js-client": "^4.5.0",
     "express": "^5.2.1",
     "mysql2": "^3.22.4",
+    "nodemailer": "^6.9.16",
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "nodemon": "^3.1.14",
     "supertest": "^7.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.12.1"
 }
