@@ -5,6 +5,7 @@ const emailService = require('./emailService');
 const ASUNTOS_POR_TIPO = {
     CANCELACION_CITA: 'Tu cita médica ha sido cancelada',
     CREACION_CITA: 'Confirmación de tu cita médica',
+    OFERTA_CUPO: 'Se liberó un cupo médico para ti',
 };
 
 const getAll = async () => await Notificacion.findAll();
